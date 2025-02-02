@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace SportsRezervation.API.Controllers
+namespace SportsReservation.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

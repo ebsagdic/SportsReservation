@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace SportsReservation.Core.ModelConfigurations
 {
-    public class CustomUserConfiguration : IEntityTypeConfiguration<User>
+    public class CustomUserConfiguration : IEntityTypeConfiguration<CustomUser>
     {
-        public void Configure(EntityTypeBuilder<User> builder)
+        public void Configure(EntityTypeBuilder<CustomUser> builder)
         {
             builder.Property(x => x.Name)
             .HasMaxLength(100)

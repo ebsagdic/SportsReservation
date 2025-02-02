@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
+﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SportsReservation.Core.Models
 {
-    public class User:IdentityUser
+    public class CustomUser:IdentityUser
     {
         public string Name { get; set; }
         public string Email { get; set; }

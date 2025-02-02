@@ -1,4 +1,4 @@
-namespace SportsRezervation.API
+namespace SportsReservation.API
 {
     public class WeatherForecast
     {
