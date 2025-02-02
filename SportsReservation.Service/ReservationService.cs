@@ -1,5 +1,7 @@
-﻿using SportsReservation.Core.Abstract;
+﻿using AutoMapper;
+using SportsReservation.Core.Abstract;
 using SportsReservation.Core.Models;
+using SportsReservation.Core.Models.DTO_S;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +14,17 @@ namespace SportsReservation.Service
     {
         private readonly IGenericRepository<Reservation> _reservationRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public ReservationService(IGenericRepository<Reservation> reservationRepository, IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+        public ReservationService(IGenericRepository<Reservation> reservationRepository, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _reservationRepository = reservationRepository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;   
         }
-        public async Task<bool> CreateReservationAsync(Reservation reservation)
+        public async Task<Response<ReservationDto>> CreateReservationAsync(ReservationDto reservationDto)
         {
             var existingReservations = await _reservationRepository.GetAllAsync();
-            bool hasExistingReservation = existingReservations.Any(r => r.UserId == reservation.UserId &&
+            bool hasExistingReservation = existingReservations.Any(r => r.UserId == reservationDto.UserId &&
                 r.CreateDate >= DateTime.UtcNow.Date.AddDays(-((int)DateTime.UtcNow.DayOfWeek)));
 
             if (hasExistingReservation)
@@ -28,19 +32,18 @@ namespace SportsReservation.Service
                 throw new InvalidOperationException("User can only have one reservation per week.");
             }
 
-            // Check for overlapping reservations
-            bool isOverlapping = existingReservations.Any(r => r.CreateDate == reservation.CreateDate &&
-                ((r.StartTime <= reservation.StartTime && r.EndTime > reservation.StartTime) ||
-                 (r.StartTime < reservation.EndTime && r.EndTime >= reservation.EndTime)));
+            bool isOverlapping = existingReservations.Any(r => r.CreateDate == reservationDto.CreateDate &&
+                ((r.StartTime <= reservationDto.StartTime && r.EndTime > reservationDto.StartTime) ||
+                 (r.StartTime < reservationDto.EndTime && r.EndTime >= reservationDto.EndTime)));
 
             if (isOverlapping)
             {
                 throw new InvalidOperationException("Selected time slot is already reserved.");
             }
-
+            Reservation reservation = _mapper.Map<Reservation>(reservationDto);
             await _reservationRepository.CreateAsync(reservation);
-            return true;
-            //response türünü booldan reservationdtoya çevirelim dayı
+            await _unitOfWork.CommitAsync();
+            return Response<ReservationDto>.Success(reservationDto, 200); 
         }
     }
 }
