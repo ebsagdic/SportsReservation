@@ -12,7 +12,7 @@ using SportsReservation.Repository.Context;
 namespace SportsReservation.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250202142526_mig1")]
+    [Migration("20250203113426_mig1")]
     partial class mig1
     {
         /// <inheritdoc />
@@ -243,7 +243,7 @@ namespace SportsReservation.Repository.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreateDate")
+                    b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreateUser")
@@ -277,7 +277,7 @@ namespace SportsReservation.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreateDate")
+                    b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreateUser")
@@ -322,7 +322,7 @@ namespace SportsReservation.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreateDate")
+                    b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreateUser")

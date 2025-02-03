@@ -62,7 +62,7 @@ namespace SportsReservation.Repository.Migrations
                     Amount = table.Column<int>(type: "int", nullable: false),
                     PaymentStatus = table.Column<bool>(type: "bit", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateUser = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastUpdate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LastUpdateUser = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -83,7 +83,7 @@ namespace SportsReservation.Repository.Migrations
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsPaid = table.Column<bool>(type: "bit", nullable: false),
                     QRCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateUser = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastUpdate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LastUpdateUser = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -102,7 +102,7 @@ namespace SportsReservation.Repository.Migrations
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Expiration = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateUser = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastUpdate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LastUpdateUser = table.Column<string>(type: "nvarchar(max)", nullable: true)

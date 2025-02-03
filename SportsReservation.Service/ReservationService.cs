@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SportsReservation.Core.Abstract;
+using SportsReservation.Core.Abstract.Services;
 using SportsReservation.Core.Models;
 using SportsReservation.Core.Models.DTO_S;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SportsReservation.Service
 {
-    public class ReservationService
+    public class ReservationService:IReservationService
     {
         private readonly IGenericRepository<Reservation> _reservationRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -44,6 +45,18 @@ namespace SportsReservation.Service
             await _reservationRepository.CreateAsync(reservation);
             await _unitOfWork.CommitAsync();
             return Response<ReservationDto>.Success(reservationDto, 200); 
+        }
+        public async Task CancelUnpaidReservationsAsync()
+        {
+            var reservations = await _reservationRepository.GetAllAsync();
+            var now = DateTime.UtcNow;
+
+            var unpaidReservations = reservations.Where(r => !r.IsPaid && (r.CreateDate - now.Date).TotalDays <= 1).ToList();
+
+            foreach (var reservation in unpaidReservations)
+            {
+                _reservationRepository.Delete(reservation);
+            }
         }
     }
 }
