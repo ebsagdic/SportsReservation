@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace SportsReservation.Core.Models.DTO_S
 {
-    public class UserDto
+    public class GetUserByNameDto
     {
-        public string Id { get; set; }
         public string Name { get; set; }
-        public string Email { get; set; }
-        public string UserRole { get; set; }
     }
 }
