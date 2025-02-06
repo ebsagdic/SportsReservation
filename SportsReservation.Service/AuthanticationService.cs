@@ -40,16 +40,16 @@ namespace SportsReservation.Service
                 return Response<TokenDto>.Fail(404, errors);
             }
 
-            var user = await  _userManager.FindByEmailAsync(loginDto.Email);
-
-            var userRoles = (await _userManager.GetRolesAsync(user)).ToList();
+            var user = await _userManager.FindByEmailAsync(loginDto.Email.ToUpper());
 
             if (user == null) 
             {
                 errors.Add("Bu mail adresine ait kullanıcı bulunamadı");
                 return Response<TokenDto>.Fail(400, errors);
             }
-            if(!await _userManager.CheckPasswordAsync(user, loginDto.Password))
+
+            var userRoles = (await _userManager.GetRolesAsync(user)).ToList();
+            if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 errors.Add("Email veya şifre eşleşmiyor");
                 return Response<TokenDto>.Fail(400,errors);

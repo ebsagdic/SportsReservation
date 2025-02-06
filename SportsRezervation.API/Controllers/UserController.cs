@@ -15,29 +15,27 @@ namespace SportsReservation.API.Controllers
         {
             _userService = userService;
         }
-
-        [Authorize(Roles ="Yönetici")]
-        [HttpPost]
+        [Authorize(Roles = "Yönetici")]
+        [HttpPost("YeniRolEkle")]
         public async Task<IActionResult> AddUserRole(UserRoleDto userRole)
         {
-            return ActionResultInstance(await _userService.AddUserRole(userRole.userRoles));
+            return ActionResultInstance(await _userService.AddUserRole(userRole));
         }
 
-        [Authorize(Roles = "Yönetici")]
-        [HttpPost]
+        [HttpPost("Kaydol")]
         public async Task<IActionResult> Register(UserForRegisterDto userRegisterDto) 
         {
             return ActionResultInstance(await _userService.CreateUserAsync(userRegisterDto));
         }
 
-        [HttpGet]
+        [HttpGet("Roller")]
         public IActionResult GetAllRoles()
         {
             return ActionResultInstance( _userService.GetAllRoles());
         }
 
         [Authorize(Roles = "Yönetici, Öğrenci, Personel")]
-        [HttpGet]
+        [HttpGet("UserInfo")]
         public async Task<IActionResult> GetUserByNameAsync(GetUserByNameDto getUserByNameDto) 
         {
             return ActionResultInstance(await _userService.GetUserByNameAsync(getUserByNameDto.Name));

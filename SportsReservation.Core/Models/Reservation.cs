@@ -8,11 +8,11 @@ namespace SportsReservation.Core.Models
 {
     public class Reservation: GeneralModel
     {
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public bool IsPaid { get; set; }
-        public string QRCode { get; set; }
+        public bool IsPaid { get; set; } = false;
+        public string QRCode { get; set; } = null;
 
     }
 }

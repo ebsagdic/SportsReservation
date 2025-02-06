@@ -12,7 +12,7 @@ using SportsReservation.Repository.Context;
 namespace SportsReservation.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250203113426_mig1")]
+    [Migration("20250206173632_mig1")]
     partial class mig1
     {
         /// <inheritdoc />
@@ -189,6 +189,7 @@ namespace SportsReservation.Repository.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -206,6 +207,10 @@ namespace SportsReservation.Repository.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")

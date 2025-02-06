@@ -18,15 +18,21 @@ namespace SportsReservation.Service
             _mapper = mapper;
             _roleManager = roleManager;
         }
-        public async Task<Response<NoDataDto>> AddUserRole(string newUserRole)
+        public async Task<Response<UserRoleDto>> AddUserRole(UserRoleDto newUserRole)
         {
-            var roleExists = await _roleManager.RoleExistsAsync(newUserRole);
-            var role =  new IdentityRole { Name = newUserRole };
+            var roleExists = await _roleManager.RoleExistsAsync(newUserRole.userRoles);
+            var role = new IdentityRole { Name = newUserRole.userRoles };
+            if (roleExists)
+            {
+                var errors = new List<string>();
+                errors.Add("Rol zaten mevcut");
+                return Response<UserRoleDto>.Fail(400,errors);
+            }
             if (!roleExists)
             {
-                await _roleManager.SetRoleNameAsync(role, newUserRole);
+                await _roleManager.CreateAsync(role);
             }
-            return Response<NoDataDto>.Success(null, 200);
+            return Response<UserRoleDto>.Success(null, 200);
         }
 
         public async Task<Response<UserDto>> CreateUserAsync(UserForRegisterDto userForRegisterDto)
@@ -38,12 +44,12 @@ namespace SportsReservation.Service
                 errors.Add("Böyle bir Rol tanımlaması bulunmuyor");
                 return Response<UserDto>.Fail(400, errors);
             }
-            var user = new CustomUser { Email = userForRegisterDto.Email, UserName = userForRegisterDto.UserName, Name = userForRegisterDto.FirstName, Surname = userForRegisterDto.LastName };
+            var user = new CustomUser { Email = userForRegisterDto.Email,NormalizedEmail = userForRegisterDto.Email.ToUpper(), UserName = userForRegisterDto.UserName, Name = userForRegisterDto.FirstName, Surname = userForRegisterDto.LastName,UserType = userForRegisterDto.SelectedRole };
 
-            var creatingResult = _userManager.CreateAsync(user,userForRegisterDto.Password);
-            if (!creatingResult.IsCompletedSuccessfully)
+            var creatingResult = await _userManager.CreateAsync(user, userForRegisterDto.Password);
+            if (!creatingResult.Succeeded)
             {
-                var errors = creatingResult.Result.Errors.Select(x =>x.Description).ToList();
+                var errors = creatingResult.Errors.Select(x => x.Description).ToList();
                 return Response<UserDto>.Fail(400, errors);
             }
 
@@ -61,6 +67,10 @@ namespace SportsReservation.Service
         public Response<List<string>> GetAllRoles()
         {
             var roles = _roleManager.Roles.Select(x => x.Name).ToList();
+            if (roles.Count == 0)
+            {
+                return Response<List<string>>.Success(null,204);
+            }
             return Response<List<string>>.Success(roles, 200);
         }
 

@@ -25,7 +25,7 @@ namespace SportsReservation.API.Controllers
             return ActionResultInstance(response);
         }
 
-        [HttpPost("refresh-token")]
+        [HttpPost("refreshToken")]
         public async Task<IActionResult> CreateTokenByRefreshToken(RefreshTokenDto refreshTokenDto)
         {
             var response = await _authenticationService.CreateTokenByRefreshToken(refreshTokenDto.RefreshToken);
@@ -33,7 +33,7 @@ namespace SportsReservation.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("revoke-token")]
+        [HttpPost("revokeToken")]
         public async Task<IActionResult> RevokeRefreshToken(RefreshTokenDto refreshTokenDto)
         {
             var result = await _authenticationService.RevokeRefreshToken(refreshTokenDto.RefreshToken);

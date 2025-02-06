@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SportsReservation.Core.Abstract;
 using SportsReservation.Core.Abstract.Services;
 using SportsReservation.Core.Models;
@@ -20,7 +21,35 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Swagger için Bearer token giriþi ekleme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        //Type = SecuritySchemeType.ApiKey// Aþaðýdaki 3 deðer, swagger üzerinden istek atýlýrken Bearer headerýna ihtiyaç kalmamasý için eklendi.
+        Type = SecuritySchemeType.Http,  // Burada deðiþiklik yapýldý
+        BearerFormat = "JWT",
+        Scheme = "bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -30,12 +59,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthenticationService, AuthanticationService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOption"));
 builder.Services.AddIdentity<CustomUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(options =>
-{
+{ 
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     //JWT tabanlý kimlik doðrulamanýn varsayýlan kimlik doðrulama ve
@@ -75,6 +106,8 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+app.UseHangfireDashboard();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -84,11 +117,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseHangfireDashboard();
 //RecurringJob.AddOrUpdate<IReservationService>("CancelUnpaidReservationsAsync",
 //    service => service.CancelUnpaidReservationsAsync(), "0 */10 * * * *");
 
@@ -101,5 +134,4 @@ using (var scope = app.Services.CreateScope())
         () => scope.ServiceProvider.GetRequiredService<IReservationService>().CancelUnpaidReservationsAsync(),
         "0 */10 * * * *");
 }
-
 app.Run();

@@ -12,6 +12,7 @@ namespace SportsReservation.Core.Models
         public string Name { get; set; }
         public string Surname { get; set; }
         public string Email { get; set; }
+        public string NormalizedEmail { get; set; }
         public string UserType { get; set; }
     }
 }

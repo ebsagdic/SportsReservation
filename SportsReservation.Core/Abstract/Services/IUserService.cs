@@ -13,6 +13,6 @@ namespace SportsReservation.Core.Abstract.Services
 
         Task<Response<UserDto>> GetUserByNameAsync(string userName);
         Response<List<string>> GetAllRoles();
-        Task<Response<NoDataDto>> AddUserRole(string newUserRole);
+        Task<Response<UserRoleDto>> AddUserRole(UserRoleDto newUserRole);
     }
 }
