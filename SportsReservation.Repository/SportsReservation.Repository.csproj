@@ -10,4 +10,12 @@
     <ProjectReference Include="..\SportsReservation.Core\SportsReservation.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Seed\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Iyzipay" Version="2.1.66" />
+  </ItemGroup>
+
 </Project>

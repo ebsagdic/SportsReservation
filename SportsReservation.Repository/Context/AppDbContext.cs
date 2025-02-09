@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
@@ -17,7 +18,7 @@ namespace SportsReservation.Repository.Context
         public AppDbContext(DbContextOptions<AppDbContext> options):base(options)
         {
         }
-        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentModel> Payments { get; set; }
         public DbSet<Reservation> Reservations { get; set; } 
         public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
 

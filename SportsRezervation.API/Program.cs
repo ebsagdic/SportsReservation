@@ -1,3 +1,5 @@
+using FluentValidation.AspNetCore;
+using FluentValidation;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +15,8 @@ using SportsReservation.Repository.UnitOfWork;
 using SportsReservation.Service;
 using System.Security.Claims;
 using System.Text;
+using SportsReservation.Core.Models.DTO_S;
+using SportsReservation.Service.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,7 +54,12 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddFluentValidationAutoValidation();
 
+builder.Services.AddValidatorsFromAssemblyContaining<UserForRegisterDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ReservationDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<PaymentDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UserForLoginDtoValidator>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddHangfireServer();
@@ -61,8 +70,10 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthanticationService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOption"));
+builder.Services.Configure<IyzicOptions>(builder.Configuration.GetSection("IyzicOption"));
 builder.Services.AddIdentity<CustomUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(options =>

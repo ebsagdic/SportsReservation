@@ -79,11 +79,11 @@ namespace SportsReservation.Repository.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsPaid = table.Column<bool>(type: "bit", nullable: false),
-                    QRCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QRCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateUser = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastUpdate = table.Column<DateTime>(type: "datetime2", nullable: true),

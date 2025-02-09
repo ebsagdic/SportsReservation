@@ -234,7 +234,7 @@ namespace SportsReservation.Repository.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("SportsReservation.Core.Models.Payment", b =>
+            modelBuilder.Entity("SportsReservation.Core.Models.PaymentModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -298,14 +298,13 @@ namespace SportsReservation.Repository.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("QRCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

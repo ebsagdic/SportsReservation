@@ -25,7 +25,7 @@ namespace SportsReservation.Repository.Repositories
 
         public async Task CreateAsync(TEntity entity)
         {
-            var a = await _dbSet.AddAsync(entity);
+            await _dbSet.AddAsync(entity);
         }
 
         public void Delete(TEntity entity)

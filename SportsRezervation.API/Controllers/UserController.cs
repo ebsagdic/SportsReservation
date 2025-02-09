@@ -15,7 +15,7 @@ namespace SportsReservation.API.Controllers
         {
             _userService = userService;
         }
-        [Authorize(Roles = "Yönetici")]
+
         [HttpPost("YeniRolEkle")]
         public async Task<IActionResult> AddUserRole(UserRoleDto userRole)
         {

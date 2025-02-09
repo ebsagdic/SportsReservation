@@ -12,7 +12,7 @@ namespace SportsReservation.Core.Models
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public bool IsPaid { get; set; } = false;
-        public string QRCode { get; set; } = null;
+        public string? QRCode { get; set; }
 
     }
 }

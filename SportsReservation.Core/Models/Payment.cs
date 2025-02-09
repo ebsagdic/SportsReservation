@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SportsReservation.Core.Models
 {
-    public class Payment: GeneralModel
+    public class PaymentModel: GeneralModel
     {
         public int ReservationId { get; set; }
         public int Amount { get; set; }
