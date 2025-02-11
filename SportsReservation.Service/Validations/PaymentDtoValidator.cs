@@ -12,7 +12,7 @@ namespace SportsReservation.Service.Validations
     {
         public PaymentDtoValidator()
         {
-            RuleFor(x=>x.CardNumber).NotEmpty().Matches(@"^\d+$").WithMessage("Kart numarası sadece rakamlardan oluşmalıdır.").Length(20).WithMessage("Kart numarası 16 karakter olmalıdır.");
+            RuleFor(x=>x.CardNumber).NotEmpty().Matches(@"^\d+$").WithMessage("Kart numarası sadece rakamlardan oluşmalıdır.").Length(16).WithMessage("Kart numarası 16 karakter olmalıdır.");
             
             RuleFor(x=>x.ExpireMonth).NotEmpty().Matches(@"^\d+$").WithMessage("Expire Month sadece rakamlardan oluşmalıdır.").MinimumLength(1).MaximumLength(2).WithMessage("Expire Month 1 ile 2 karakter arasında olmalıdır.");
 

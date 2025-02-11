@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,6 @@ namespace SportsReservation.Core.Abstract
     {
         Task CommitAsync();
         void Commit();
-
+        Task<IDbContextTransaction>BeginTransactionAsync();
     }
 }

@@ -3,6 +3,10 @@ using Iyzipay;
 using Iyzipay.Model;
 using Iyzipay.Request;
 using Microsoft.AspNet.Identity;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+
+
 
 //using Microsoft.Extensions.Options;
 using SportsReservation.Core.Abstract;
@@ -10,6 +14,9 @@ using SportsReservation.Core.Abstract.Services;
 using SportsReservation.Core.Models;
 using SportsReservation.Core.Models.DTO_S;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Channels;
 
 namespace SportsReservation.Service
 {
@@ -30,6 +37,8 @@ namespace SportsReservation.Service
         }
         public async Task<Response<PaymentModel>> PaymentIyzico(PaymentDto paymentDto, int amount)
         {
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+
             Options options = new Options();
             options.ApiKey = _iyzicOptions.ApiKey;
             options.SecretKey = _iyzicOptions.SecurityKey;
@@ -98,33 +107,86 @@ namespace SportsReservation.Service
             };
             basketItems.Add(firstBasketItem);
 
-            request.BasketItems = basketItems;;
+            request.BasketItems = basketItems;
 
             Payment iyzicoPayment = await Payment.Create(request, options);
 
-            if (iyzicoPayment.Status == "success") 
+            if (iyzicoPayment.Status == "success")
             {
-                var reservation =  _reservationRepository.FindByCondition(x => x.UserId == paymentDto.UserId).FirstOrDefault();
-                if (reservation != null) 
-                {
-                    reservation.IsPaid = true;
-                    _reservationRepository.Update(reservation);
-                    await _unitOfWork.CommitAsync();
-                }
-                var paymentResponse = new PaymentModel
-                {
-                    ReservationId = reservation.Id,
-                    Amount = amount,
-                    PaymentStatus = true,
-                    PaymentDate = DateTime.Now,
-                    CreateDate = DateTime.Now,
-                    CreateUser = reservation.UserId.ToString(),
-                };
-                await _paymentRepository.CreateAsync(paymentResponse);
-                await _unitOfWork.CommitAsync();
+                ConnectionFactory connectionFactory = new ConnectionFactory();
+                connectionFactory.Uri = new Uri("amqps://qjgqxgdo:m_h6n4U-1ZKF9RnrBOOwbyJU91y21A14@rattlesnake.rmq.cloudamqp.com/qjgqxgdo");
 
-                return Response<PaymentModel>.Success(paymentResponse, 200);
+                using IConnection connection = connectionFactory.CreateConnection();
+                using IModel channel = connection.CreateModel();
+
+                string queueName = "UnPaidReservationQueue";
+
+                channel.ExchangeDeclare(exchange: "directly-exchange", type: ExchangeType.Direct);
+
+                channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
+
+                channel.QueueBind(queue: queueName,
+                    exchange: "directly-exchange",
+                    routingKey: "UnPaidReservation");
+
+                BasicGetResult result = channel.BasicGet(queueName, true);
+
+                if (result != null)
+                {
+                    string message = Encoding.UTF8.GetString(result.Body.Span);
+                    var reservationData = JsonSerializer.Deserialize<Reservation>(message);
+
+
+                    if (reservationData != null)
+                    {
+                        reservationData.IsPaid = true;
+                        _reservationRepository.Update(reservationData);
+                        await _unitOfWork.CommitAsync();
+
+                        var paymentRecord = new PaymentModel
+                        {
+                            ReservationId = reservationData.Id,
+                            Amount = amount,
+                            PaymentStatus = true,
+                            PaymentDate = DateTime.UtcNow,
+                            CreateDate = DateTime.UtcNow,
+                            CreateUser = reservationData.UserId.ToString(),
+                        };
+
+                        await _paymentRepository.CreateAsync(paymentRecord);
+                        await _unitOfWork.CommitAsync();
+
+                        channel.BasicAck(result.DeliveryTag, false);
+
+                        await transaction.CommitAsync();
+
+                        return Response<PaymentModel>.Success(paymentRecord, 200);
+                    }
+                }
+
+                CreateRefundRequest refundRequest = new CreateRefundRequest
+                {
+                    Locale = Locale.TR.ToString(),
+                    ConversationId = request.ConversationId,
+                    PaymentTransactionId = iyzicoPayment.PaymentId,
+                    Price = amount.ToString(),
+                    Currency = Currency.TRY.ToString()
+                };
+
+                Refund refund = await Refund.Create(refundRequest, options);
+
+                if (refund.Status == "success")
+                {
+                    await transaction.RollbackAsync(); 
+                    return Response<PaymentModel>.Fail(404, new List<string> { "Rezervasyon bulunamadı, ödeme geri alındı." });
+                }
+                else
+                {
+                    await transaction.RollbackAsync(); 
+                    return Response<PaymentModel>.Fail(500, new List<string> { "Ödeme iptal edilemedi! Manuel kontrol gerekli." });
+                }
             }
+            await transaction.RollbackAsync();
             var error = new List<string> { new string(iyzicoPayment.ErrorMessage.ToArray()) }; ;
             return Response<PaymentModel>.Fail(400, error);
         }
