@@ -38,6 +38,8 @@ namespace SportsReservation.Service
         public async Task<Response<PaymentModel>> PaymentIyzico(PaymentDto paymentDto, int amount)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
+            //Aslında using kullanamdan da yapılabilir çünkü BeginTransactionAsync in geldiği interface IDbContextTransaction iDisposable ,
+            //ancak transactionu manuel dispose etmekle uğraşmayalım diye bu yapıyı tercih ettim.
 
             Options options = new Options();
             options.ApiKey = _iyzicOptions.ApiKey;

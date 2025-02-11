@@ -1,0 +1,46 @@
+﻿@model UserModel
+
+@{
+    ViewData["Title"] = "User Info";
+}
+
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Kullanıcı Bilgileri</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover ">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col" style="width: 30%;">Bilgi</th>
+                    <th scope="col" style="width: 70%;">Değer</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>ID</strong></td>
+                    <td>@Model.Id</td>
+                </tr>
+                <tr>
+                    <td><strong>Kullanıcı Adı</strong></td>
+                    <td>@Model.UserName</td>
+                </tr>
+                <tr>
+                    <td><strong>Ad</strong></td>
+                    <td>@Model.FirstName</td>
+                </tr>
+                <tr>
+                    <td><strong>Soyad</strong></td>
+                    <td>@Model.LastName</td>
+                </tr>
+                <tr>
+                    <td><strong>E-Posta</strong></td>
+                    <td>@Model.Email</td>
+                </tr>
+                <tr>
+                    <td><strong>Roller</strong></td>
+                    <td>@Model.SelectedRoles</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
