@@ -34,11 +34,12 @@ namespace SportsReservation.API.Controllers
             return ActionResultInstance( _userService.GetAllRoles());
         }
 
-        [Authorize(Roles = "Yönetici, Öğrenci, Personel")]
-        [HttpGet("UserInfo")]
-        public async Task<IActionResult> GetUserByNameAsync(GetUserByNameDto getUserByNameDto) 
+        [Authorize]
+        [HttpGet("GetUserByNameAsync")]
+        public async Task<IActionResult> GetUserByNameAsync() 
         {
-            return ActionResultInstance(await _userService.GetUserByNameAsync(getUserByNameDto.Name));
+            var response = await _userService.GetUserByNameAsync(HttpContext.User.Identity.Name);
+            return ActionResultInstance(response);
         }
     }
 }

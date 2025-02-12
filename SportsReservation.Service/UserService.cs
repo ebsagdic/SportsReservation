@@ -74,9 +74,9 @@ namespace SportsReservation.Service
             return Response<List<string>>.Success(roles, 200);
         }
 
-        public async Task<Response<UserDto>> GetUserByNameAsync(string userName)
+        public async Task<Response<UserDto>> GetUserByNameAsync(string name)
         {
-            var user = await _userManager.FindByNameAsync(userName);
+            var user = await _userManager.FindByNameAsync(name);
             var userRoles = (await _userManager.GetRolesAsync(user)).ToList();
             var errors = new List<string>();
 

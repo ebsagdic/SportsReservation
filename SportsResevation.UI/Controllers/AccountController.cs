@@ -136,8 +136,12 @@ namespace SportsResevation.UI.Controllers
             if (result.IsSuccessStatusCode)
             {
                 var control = await result.Content.ReadAsStringAsync();
-                responseModel = JsonSerializer.Deserialize<ResponseMainModel<UserModel>>(await result.Content.ReadAsStringAsync(), options);
-                userModel = responseModel?.Data ?? new UserModel() { };
+                responseModel = JsonSerializer.Deserialize<ResponseMainModel<UserModel>>(control, options);
+                userModel.Id = responseModel.Data.Id;
+                userModel.Name = responseModel.Data.Name;
+                userModel.Email = responseModel.Data.Email;
+                userModel.UserRole = responseModel.Data.UserRole;
+                //userModel = responseModel?.Data ?? new UserModel() { };
                 //?? new UserModel(): Eğer responseModel null ya da Data boş ise, yeni bir UserModel nesnesi oluşturur.
             }
             return View(userModel);
