@@ -17,9 +17,9 @@ using System.Security.Claims;
 using System.Text;
 using SportsReservation.Core.Models.DTO_S;
 using SportsReservation.Service.Validations;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -63,14 +63,14 @@ builder.Services.AddValidatorsFromAssemblyContaining<UserForLoginDtoValidator>()
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddHangfireServer();
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthanticationService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOption"));
 builder.Services.Configure<IyzicOptions>(builder.Configuration.GetSection("IyzicOption"));
@@ -114,6 +114,17 @@ builder.Services.AddAuthentication(options =>
         RoleClaimType = ClaimTypes.Role,
     };
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins",
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:7235") // MVC projesinin URL'sini buraya ekle
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+});
 
 var app = builder.Build();
 
@@ -127,10 +138,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
+app.UseCors("AllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 //RecurringJob.AddOrUpdate<IReservationService>("CancelUnpaidReservationsAsync",
@@ -143,6 +154,6 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate(
         "CancelUnpaidReservationsAsync",
         () => scope.ServiceProvider.GetRequiredService<IReservationService>().CancelUnpaidReservationsAsync(),
-        "0 */10 * * * *");
+        "59 23 * * *");
 }
 app.Run();

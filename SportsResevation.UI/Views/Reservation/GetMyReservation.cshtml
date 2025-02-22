@@ -1,0 +1,86 @@
+﻿@model ReservationInfoWithPaidInfo
+
+
+@if (Model != null && Model.StartTime != DateTime.MinValue)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Başlama Saati</th>
+                <th>Bitiş Saati</th>
+                <th>Ödendi Bilgisi</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@Model.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>@Model.EndTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    @if (Model.IsPaid)
+                    {
+                        <span class="badge bg-success">Ödendi</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Ödenmedi</span>
+                    }
+                </td>
+                <td>
+                    @if (!Model.IsPaid)
+                    {
+                        <a asp-controller="Payment" asp-action="PaymentIyzico" class="btn btn-primary">Ödeme Yap</a>
+                        <button type="button" class="btn btn-danger" onclick="cancelReservation()">Reservasyon İptali</button>
+                    }
+                    else
+                    {
+                        <h6>Ödeme Yapıldı İptal Yapılamaz</h6>
+                    }
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning">
+        Herhangi bir rezervasyonunuz bulunmamaktadır.
+    </div>
+}
+<script>
+    async function cancelReservation() {
+        const apiUrl = `https://localhost:7122/api/Reservation/CancelMyReservation`;
+        let token = '@ViewData["AccessToken"]';;
+
+        if (!token) {
+            alert("Yetkilendirme hatası! Lütfen tekrar giriş yapın.");
+            return;
+        }
+
+        let userConfirmed = confirm(`Rezervasyonunuzu iptal etmek istediğinize emin misiniz?`);
+
+        if (!userConfirmed) {
+            return;
+        }
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                alert("Rezervasyon başarıyla iptal edildi.");
+                window.location.reload(); // Sayfayı yenile, yeni verileri görmek için
+            } else {
+                const errorMessage = await response.text();
+                alert("Hata: " + errorMessage);
+            }
+        } catch (error) {
+            console.error("İstek sırasında hata oluştu:", error);
+            alert("Sunucu hatası! Lütfen tekrar deneyin.");
+        }
+    }
+</script>

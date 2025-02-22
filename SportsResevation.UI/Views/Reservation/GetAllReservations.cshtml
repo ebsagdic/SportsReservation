@@ -1,0 +1,188 @@
+﻿@model ReservationInfoListModel
+
+@{
+    var today = DateTime.Today;
+    var now = DateTime.Now;
+    var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1);
+    var daysOfWeek = Enumerable.Range(0, 6).Select(i => startOfWeek.AddDays(i)).ToList();
+    var allHours = Enumerable.Range(9, 15).Select(h => new TimeSpan(h, 0, 0)).ToList();
+}
+
+<div class="calendar-container">
+    <div class="grid-container">
+        <div class="empty-cell"></div>
+        @foreach (var day in daysOfWeek)
+        {
+            <div class="day-header">@day.ToString("dd MMM dddd")</div>
+        }
+
+        @foreach (var hour in allHours)
+        {
+            <div class="hour-cell">@hour.ToString(@"hh\:mm")</div>
+
+            @foreach (var day in daysOfWeek)
+            {
+                var startTime = day.Date + hour;
+                var endTime = startTime.AddHours(1);
+
+                var isReserved = Model.Reservations.Any(r => r.StartTime >= startTime && r.StartTime < endTime);
+                var isPast = startTime < now; 
+
+                <div class="time-slot @(isReserved ? "reserved" : "available")"
+                     data-start="@startTime.ToString("yyyy-MM-ddTHH:mm:ss")"
+                     onclick="createReservation(this)">
+                    @(isPast ? "Geçersiz=" : "")
+                    @(isReserved ? "Rezerve =" : "")
+                    @hour.ToString(@"hh\:mm")
+                </div>
+            }
+        }
+    </div>
+</div>
+<div class="alert alert-info" role="alert">
+    Uygun alanları seçerek rezervasyon işlemini gerçekleştirebilirsiniz!
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let now = new Date(); // Şu anki tarih ve saat
+
+        document.querySelectorAll(".time-slot").forEach(slot => {
+            let startTime = slot.getAttribute("data-start");
+            let startDate = new Date(startTime);
+
+            if (startDate < now) {
+                slot.classList.add("reserved"); // CSS ile gri yap
+                slot.setAttribute("disabled", "disabled"); // HTML'de devre dışı bırak
+                slot.onclick = null; // Tıklamayı tamamen iptal et
+            }
+        });
+    });
+
+    async function createReservation(element) {
+        let startTime = element.getAttribute("data-start");
+        let startDate = new Date(startTime);
+        let startTimeISO = startDate.toISOString();
+        let endTime = new Date(new Date(startDate).getTime() + 60 * 60 * 1000).toISOString();
+
+        let token = '@ViewData["AccessToken"]';;
+
+        if (!token) {
+            alert("Token bulunamadı. Lütfen giriş yapın.");
+            return;
+        }
+
+        let userConfirmed = confirm(`Seçilen saat: ${startDate.toLocaleString()}.\nBu saat için rezervasyon yapmak istediğinize emin misiniz?`);
+
+        if (!userConfirmed) {
+            return; 
+        }
+
+        let response = await fetch('https://localhost:7122/api/Reservation/', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({
+                StartTime: startTimeISO,
+                EndTime: endTime
+            })
+        });
+        
+
+        if (response.ok) {
+            alert("Rezervasyon başarılı!");
+            element.classList.remove("available");
+            element.classList.add("reserved");
+            element.disabled = true;
+        } else {
+            alert("Rezervasyon yapılamadı! Hata");
+            console.error("Rezervasyon hatası:", await response.text());
+        }
+    }
+</script>
+
+
+<style>
+    .calendar-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: 100px repeat(6, 150px);
+        gap: 2px;
+    }
+
+    .empty-cell {
+        background: none;
+    }
+
+    .day-header {
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-bottom: 2px solid black;
+    }
+
+    .hour-cell {
+        font-weight: bold;
+        text-align: center;
+        background-color: #f8f8f8;
+        padding: 5px;
+    }
+
+    .time-slot {
+        text-align: center;
+        padding: 5px;
+        border: 1px solid #ccc;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .reserved {
+        background-color: darkgray;
+        color: white;
+        font-weight: bold;
+        cursor: not-allowed;
+    }
+
+    .available:hover {
+        background-color: lightgray;
+    }
+</style>
+
+
+
+
+
+
+@* <div class="container mt-4">
+    <h2 class="mb-4 text-center">Reservasyon Bilgileri</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover ">
+            <thead>
+                <tr>
+                    <th><strong>Rezervasyon Başlama Tarihi</strong></th>
+                    <th><strong>Rezervasyon Bitiş Tarihi</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var r in Model.Reservations)
+                {
+                    <tr>              
+                        <td>@r.StartTime</td>
+                    
+                        <td>@r.EndTime</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div> *@

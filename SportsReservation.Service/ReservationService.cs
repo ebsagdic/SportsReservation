@@ -16,16 +16,34 @@ namespace SportsReservation.Service
     public class ReservationService:IReservationService
     {
         private readonly IGenericRepository<Reservation> _reservationRepository;
+        private readonly IReservationRepository _reservationNonGenericRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public ReservationService(IGenericRepository<Reservation> reservationRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public ReservationService(IGenericRepository<Reservation> reservationRepository, IReservationRepository reservationNonGenericRepo, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _reservationRepository = reservationRepository;
+            _reservationNonGenericRepo = reservationNonGenericRepo;
             _unitOfWork = unitOfWork;
             _mapper = mapper;   
         }
-        public async Task<Response<ReservationDto>> CreateReservationAsync(ReservationDto reservationDto)
+        public async Task<Response<ReservationDto>> CreateReservationAsync(ReservationDto reservationDto, string userRole)
         {
+            if (reservationDto.StartTime.DayOfWeek == DayOfWeek.Sunday)
+            {
+                return Response<ReservationDto>.Fail(400, new List<string> { "Pazar günü rezervasyon yapılamaz." });
+            }
+            if (reservationDto.StartTime.Hour < 9)
+            {
+                return Response<ReservationDto>.Fail(400, new List<string> { "Rezervasyon sabah en erken 09:00'da başlayabilir." });
+            }
+            if (userRole != "Yönetici" && (reservationDto.EndTime - reservationDto.StartTime).TotalHours > 1)
+            {
+                return Response<ReservationDto>.Fail(400, new List<string> { "Öğrenci ve personel yalnızca 1 saatlik rezervasyon yapabilir." });
+            }
+            if (userRole == "Yönetici" && (reservationDto.EndTime - reservationDto.StartTime).TotalMinutes % 60 != 0)
+            {
+                return Response<ReservationDto>.Fail(400, new List<string> { "Yönetici sadece 1 saat veya katları şeklinde rezervasyon yapabilir." });
+            }
             var existingReservations = await _reservationRepository.GetAllAsync();
             bool hasExistingReservation = existingReservations.Any(r => r.UserId == reservationDto.UserId &&
                 r.CreateDate >= DateTime.UtcNow.Date.AddDays(-((int)DateTime.UtcNow.DayOfWeek)));
@@ -62,7 +80,7 @@ namespace SportsReservation.Service
             channel.BasicPublish(exchange:"directly-exchange",routingKey:"UnPaidReservation",body: byteMessage);
             return Response<ReservationDto>.Success(reservationDto, 200); 
         }
-        public async Task CancelUnpaidReservationsAsync()
+        public async Task<Response<NoDataDto>> CancelUnpaidReservationsAsync()
         {
             var reservations = await _reservationRepository.GetAllAsync();
             var now = DateTime.UtcNow;
@@ -71,7 +89,7 @@ namespace SportsReservation.Service
 
             if (!unpaidReservations.Any())
             {
-                return; // Ödenmemiş rezervasyon yoksa işlemi durdur
+                return Response<NoDataDto>.Fail(400, new List<string> {"Ödenmemiş rezervasyon bulunamadı"}); 
             }
 
             ConnectionFactory factory = new ConnectionFactory
@@ -110,7 +128,27 @@ namespace SportsReservation.Service
                 _reservationRepository.Delete(reservation);
             }
 
-            await _unitOfWork.CommitAsync(); 
+            await _unitOfWork.CommitAsync();
+            return Response<NoDataDto>.Fail(200, new List<string> { "Ödenmemiş rezervasyonlar kaldırıldı" });
+        }
+
+        public async Task<Response<List<ReservationInfoDto>>> GetAllReservation()
+        {
+            var reservations = await _reservationRepository.GetAllAsync();
+            var reservationDtos = _mapper.Map<List<ReservationInfoDto>>(reservations);
+            return Response<List<ReservationInfoDto>>.Success(reservationDtos, 200);
+        }
+        public async Task<Response<ReservationInfoWithPaidInfo>> GetMyReservation(Guid userId)
+        {
+            var myReservation = await _reservationNonGenericRepo.GetByGuidIdAsync(userId);
+            return Response<ReservationInfoWithPaidInfo>.Success(myReservation, 200);
+        }
+
+        public async Task<Response<NoDataDto>> DeleteMyReservationsAsync(Guid userId)
+        {
+            var reservationNonGeneric = await _reservationNonGenericRepo.DeleteByGuidIdAsync(userId);
+            await _unitOfWork.CommitAsync();
+            return Response<NoDataDto>.Fail(200, new List<string> { "Rezervasyon silindi." });
         }
     }
 }

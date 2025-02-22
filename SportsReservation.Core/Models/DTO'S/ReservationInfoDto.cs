@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace SportsReservation.Core.Models.DTO_S
 {
-    public class ReservationDto
+    public class ReservationInfoDto
     {
-        public Guid? UserId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public DateTime? CreateDate { get; set; } = DateTime.Now;
     }
 }

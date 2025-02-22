@@ -1,0 +1,32 @@
+﻿@model PaymentIyzico
+
+<h2>Ödeme Bilgileri</h2>
+<form asp-controller="Payment" asp-action="PaymentIyzico" method="post">
+    <div class="mb-3">
+        <label for="CardHolderName" class="form-label">Kart Sahibinin Adı</label>
+        <input type="text" class="form-control" id="CardHolderName" name="CardHolderName" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="CardNumber" class="form-label">Kart Numarası</label>
+        <input type="text" class="form-control" id="CardNumber" name="CardNumber" maxlength="16" required>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <label for="ExpireMonth" class="form-label">Son Kullanma Ay</label>
+            <input type="text" class="form-control" id="ExpireMonth" name="ExpireMonth" maxlength="2" required>
+        </div>
+        <div class="col-md-6">
+            <label for="ExpireYear" class="form-label">Son Kullanma Yıl</label>
+            <input type="text" class="form-control" id="ExpireYear" name="ExpireYear" maxlength="4" required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="Cvc" class="form-label">CVC</label>
+        <input type="text" class="form-control" id="Cvc" name="Cvc" maxlength="3" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ödeme Yap</button>
+</form>

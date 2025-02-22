@@ -56,7 +56,6 @@ namespace SportsReservation.Repository.Repositories
         public async Task<TEntity> GetByIdAsync(int id)
         {
             var entity = await _dbSet.FindAsync(id);
-
             if (entity != null)
             {
                 // _context.Entry(entity).State = EntityState.Detached;

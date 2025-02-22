@@ -16,7 +16,11 @@ namespace SportsReservation.Service.Validations
             RuleFor(x => x.StartTime)
             .NotEmpty().WithMessage("Başlangıç zamanı boş olamaz.")
             .GreaterThan(DateTime.Now).WithMessage("Başlangıç zamanı geçmişte olamaz.")
-            .Must(BeValidDateTime).WithMessage("Geçerli bir tarih formatı giriniz.");
+            .Must(BeValidDateTime).WithMessage("Geçerli bir tarih formatı giriniz.")
+            .Must(startTime => startTime.DayOfWeek != DayOfWeek.Sunday)
+            .WithMessage("Pazar günü rezervasyon yapılamaz.")
+            .Must(startTime => startTime.Hour >= 9)
+            .WithMessage("Rezervasyon sabah en erken 09:00'da başlayabilir.");
 
             RuleFor(x => x.EndTime)
                 .NotEmpty().WithMessage("Bitiş zamanı boş olamaz.")

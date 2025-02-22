@@ -15,6 +15,7 @@ namespace SportsReservation.Service
         {
             CreateMap<CustomUser, UserDto>().ReverseMap();
             CreateMap<Reservation, ReservationDto>().ReverseMap();
+            CreateMap<Reservation, ReservationInfoDto>().ReverseMap();
         }
     }
 }
