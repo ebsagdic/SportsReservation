@@ -25,7 +25,7 @@ namespace SportsReservation.Repository.Repositories
         public async Task<ReservationInfoWithPaidInfo> GetByGuidIdAsync(Guid id)
         {
             var reservations = await _context.Reservations
-            .Where(r => r.UserId == id)
+            .Where(r => r.UserId == id && r.EndTime>DateTime.UtcNow)
             .Select(r => new ReservationInfoWithPaidInfo
             {
                 StartTime = r.StartTime,

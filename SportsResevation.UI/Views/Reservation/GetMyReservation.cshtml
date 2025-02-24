@@ -13,31 +13,42 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>@Model.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>@Model.EndTime.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>
-                    @if (Model.IsPaid)
-                    {
-                        <span class="badge bg-success">Ödendi</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger">Ödenmedi</span>
-                    }
-                </td>
-                <td>
-                    @if (!Model.IsPaid)
-                    {
-                        <a asp-controller="Payment" asp-action="PaymentIyzico" class="btn btn-primary">Ödeme Yap</a>
-                        <button type="button" class="btn btn-danger" onclick="cancelReservation()">Reservasyon İptali</button>
-                    }
-                    else
-                    {
-                        <h6>Ödeme Yapıldı İptal Yapılamaz</h6>
-                    }
-                </td>
-            </tr>
+            @if(Model.EndTime>DateTime.Now)
+            {
+                <tr>
+                    <td>@Model.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@Model.EndTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        @if (Model.IsPaid)
+                        {
+                            <span class="badge bg-success">Ödendi</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Ödenmedi</span>
+                        }
+                    </td>
+                    <td>
+                        @if (!Model.IsPaid)
+                        {
+                            <a asp-controller="Payment" asp-action="PaymentIyzico" class="btn btn-primary">Ödeme Yap</a>
+                            <button type="button" class="btn btn-danger" onclick="cancelReservation()">Reservasyon İptali</button>
+                        }
+                        else
+                        {
+                            <h6>Ödeme Yapıldı İptal Yapılamaz</h6>
+                        }
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">
+                        <div class="alert alert-warning m-0">Ödeme veya iptale uygun rezervasyonunuz bulunmamaktadır</div>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 }
