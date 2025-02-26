@@ -2,7 +2,7 @@
 
 @{
     var today = DateTime.Today;
-    var now = DateTime.Now;
+    var now = DateTime.UtcNow;
     var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1);
     var daysOfWeek = Enumerable.Range(0, 6).Select(i => startOfWeek.AddDays(i)).ToList();
     var allHours = Enumerable.Range(9, 15).Select(h => new TimeSpan(h, 0, 0)).ToList();
@@ -23,13 +23,15 @@
             @foreach (var day in daysOfWeek)
             {
                 var startTime = day.Date + hour;
-                var endTime = startTime.AddHours(1);
+                var adjustedStartTime = startTime;
+                var endTime = adjustedStartTime.AddHours(1);
 
-                var isReserved = Model.Reservations.Any(r => r.StartTime >= startTime && r.StartTime < endTime);
-                var isPast = startTime < now; 
+                var isReserved = Model.Reservations.Any(r => r.StartTime >= adjustedStartTime && r.StartTime < endTime);
+                var isPast = startTime.ToUniversalTime() < DateTime.UtcNow;
+                var localStartTime = adjustedStartTime.ToLocalTime();
 
                 <div class="time-slot @(isReserved ? "reserved" : "available")"
-                     data-start="@startTime.ToString("yyyy-MM-ddTHH:mm:ss")"
+                     data-start="@adjustedStartTime.ToString("yyyy-MM-ddTHH:mm:ss")"
                      onclick="createReservation(this)">
                     @(isPast ? "Geçersiz=" : "")
                     @(isReserved ? "Rezerve =" : "")

@@ -123,7 +123,7 @@ namespace SportsReservation.Service
 
                 string queueName = "UnPaidReservationQueue";
 
-                channel.ExchangeDeclare(exchange: "directly-exchange", type: ExchangeType.Direct);
+                channel.ExchangeDeclare(exchange: "directly-exchange", type: ExchangeType.Direct, durable: true);
 
                 channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
 
