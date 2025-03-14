@@ -16,7 +16,7 @@ namespace SportsReservation.API.Controllers
         {
             _paymentService = paymentService;
         }
-
+        //Karatren
         [Authorize(Roles = "Yönetici,Personel,Öğrenci")]
         [HttpPost]
         public async Task<IActionResult> Payment(PaymentDto paymentDto) 
